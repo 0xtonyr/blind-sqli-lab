@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="https://unpkg.com/htmx.org@1.5.0"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Crie sua Conta</h2>
+        <form action="/submit" method="post">
+            <!-- Nome de Usuário com verificação em tempo real -->
+            <label for="username">Nome de Usuário:</label>
+            <input type="text" id="username" name="username" 
+                   hx-get="/check-username" 
+                   hx-target="#username-check" 
+                   hx-trigger="keyup changed delay:500ms">
+            <div id="username-check" class="username-status"></div>
+
+            <!-- E-mail com verificação em tempo real -->
+            <label for="email">E-mail:</label>
+            <input type="email" id="email" name="email" 
+                   hx-get="/check-email" 
+                   hx-target="#email-check" 
+                   hx-trigger="keyup changed delay:500ms">
+            <div id="email-check" class="email-status"></div>
+
+            <!-- Senha -->
+            <label for="password">Senha:</label>
+            <input type="password" id="password" name="password" required>
+
+            <!-- Botão de Registro -->
+            <button type="submit">Registrar</button>
+        </form>
+    </div>
+</body>
+</html>
