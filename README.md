@@ -26,7 +26,7 @@ against systems you are not explicitly authorized to test.
 
 ```
 poc-bsqli.go  ──  GET /check-username?username=<payload>  ──▶  zerosec-app (Go, :8081)
-   (attacker) ◀──  {"message":"usuario indisponivel"|"...disponivel"}  ──┘
+   (attacker) ◀──  {"message":"username unavailable"|"username available"}  ──┘
                                                                           │ concatenated SQL
                                                                           ▼
                                                               MySQL: sql_injection_demo.users
@@ -48,8 +48,8 @@ concatenation:
 ```go
 query := "SELECT EXISTS(SELECT 1 FROM users WHERE username='" + username + "');"
 db.QueryRow(query).Scan(&exists)
-// exists == 1 → "usuario indisponivel"   (condition TRUE)
-// exists == 0 → "usuario disponivel"     (condition FALSE)
+// exists == 1 → "username unavailable"   (condition TRUE)
+// exists == 0 → "username available"     (condition FALSE)
 ```
 
 Because the input lands inside a quoted string, the exploit closes the quote and injects a
@@ -69,8 +69,8 @@ The response acts as a boolean oracle:
 
 | JSON response | Meaning | Oracle |
 |---|---|---|
-| `"usuario indisponivel"` | `EXISTS()` returned 1, row found | TRUE |
-| `"usuario disponivel"` | no row matched | FALSE |
+| `"username unavailable"` | `EXISTS()` returned 1, row found | TRUE |
+| `"username available"` | no row matched | FALSE |
 
 Any question of the form *"is the N-th character's ASCII value related to X?"* can be answered
 one bit at a time.

