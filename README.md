@@ -143,7 +143,38 @@ The exploit prints the actual request count and elapsed time per method at the e
 
 ## Running the lab
 
-### Prerequisites
+### With Docker (recommended)
+
+The whole lab — MySQL, the seeded database, and the vulnerable app — is packaged with
+Docker Compose, so the only requirement is Docker. No local Go or MySQL needed.
+
+```bash
+docker compose up --build        # starts MySQL + the app on http://localhost:8081
+```
+
+The database schema and the sample user are seeded automatically on first start from
+[`zerosec-app/database/init.sql`](zerosec-app/database/init.sql). In another terminal, run
+the exploit against the running app:
+
+```bash
+docker compose run --rm poc      # extracts jhondoe's hash with all three techniques
+```
+
+To target a different user or host, override the command:
+
+```bash
+docker compose run --rm poc -target jhondoe -host http://app:8081
+```
+
+Tear everything down (and wipe the database volume) with:
+
+```bash
+docker compose down -v
+```
+
+### Manual setup
+
+Prefer running directly on the host? You'll need:
 
 - Go 1.23+
 - MySQL/MariaDB running locally
@@ -201,16 +232,19 @@ counts the table rows, and discovers the password length so the loops terminate 
 
 ```
 blind-sqli-techniques/
+├── docker-compose.yml        # Full lab: MySQL + app (+ on-demand exploit)
 ├── poc-script/
-│   └── poc-bsqli.go          # Exploit: oracle + 3 extraction techniques
+│   ├── poc-bsqli.go          # Exploit: oracle + 3 extraction techniques
+│   └── Dockerfile            # Exploit runner image
 └── zerosec-app/              # Vulnerable target application
     ├── main.go               # Go server; vulnerable /check-username endpoint
+    ├── Dockerfile            # App image (multi-stage Go build)
     ├── home.html             # Landing page
     ├── register.html         # Registration screen (real-time HTMX check)
     ├── database/init.sql     # Schema + sample user seed
-    ├── setup_db.sh           # Database recreation helper
+    ├── setup_db.sh           # Database recreation helper (manual setup)
     ├── static/               # CSS and images
-    └── .env                  # MySQL credentials (git-ignored)
+    └── .env                  # MySQL credentials (git-ignored, manual setup)
 ```
 
 ## Remediation

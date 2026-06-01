@@ -16,10 +16,9 @@ var db *sql.DB
 
 // initDB initializes the database connection.
 func initDB() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// .env is optional: under Docker Compose the configuration is provided
+	// directly through environment variables, so a missing file is not fatal.
+	_ = godotenv.Load()
 
 	dbUser := os.Getenv("MYSQL_USER")
 	dbPassword := os.Getenv("MYSQL_PASSWORD")

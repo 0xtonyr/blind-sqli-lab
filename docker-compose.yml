@@ -1,0 +1,42 @@
+# Blind SQLi lab — full environment in containers.
+#
+#   docker compose up --build        # start MySQL + the vulnerable app (:8081)
+#   docker compose run --rm poc      # run the exploit against the app
+#   docker compose down -v           # stop everything and wipe the database
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_DATABASE: sql_injection_demo
+    volumes:
+      # Auto-creates the schema and seeds the sample user on first start.
+      - ./zerosec-app/database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-ptoor"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: ./zerosec-app
+    environment:
+      MYSQL_USER: root
+      MYSQL_PASSWORD: toor
+      MYSQL_HOST: db
+      MYSQL_PORT: "3306"
+      MYSQL_DB: sql_injection_demo
+    ports:
+      - "8081:8081"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # On-demand exploit runner. Started only via `docker compose run poc`,
+  # not by `docker compose up` (it belongs to the "poc" profile).
+  poc:
+    build: ./poc-script
+    profiles: ["poc"]
+    command: ["-host", "http://app:8081", "-target", "jhondoe"]
+    depends_on:
+      - app
